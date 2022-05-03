@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { BsChevronDoubleDown } from "react-icons/bs";
 import { BtnComponent as Btn } from '../components/BtnComponent';
 
 import image1 from '../img/landing1.png'
@@ -37,7 +39,8 @@ const Top = styled.div`
   .wrapper {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    width: 2000px;
+    width: 100vw;
+    max-width: 2000px;
     height: max-content;
 
     .intro {
@@ -79,6 +82,42 @@ const Top = styled.div`
     cursor: pointer;
   }
 
+  .scroll_down {
+    position: relative;
+    bottom : -150px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    color : #888;
+
+    width: 100%;
+
+    /* font-size: 1.2rem; */
+
+    p {
+      margin-bottom: 10px;
+    }
+
+    svg {
+      animation : bounce 1.2s linear infinite;
+
+      @keyframes bounce {
+        0%{
+          transform: translateY(0);
+        }
+
+        50% {
+          transform: translateY(10px);
+        }
+
+        100% {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
   @media screen and (max-width : 500px){
     min-height: 300px;
     height: max-content;
@@ -113,6 +152,10 @@ const Top = styled.div`
 
       font-size: 1rem;
     }
+
+    .scroll_down {
+      bottom : -120px;
+    }
   }
 
 `
@@ -134,19 +177,27 @@ const InnerContainer = styled.div`
     height: 400px;
     width: 100%;
 
+    margin-bottom: 300px;
+
     .image {
+      opacity: 0;
       display: grid;
       place-items: center;
 
       width: 50%;
       height: 400px;
 
+      transform: translateX(-30px);
+
       img {
         height: 400px;
       }
+
+      transition : 1s;
     }
 
     .text {
+      opacity: 0;
       position: absolute;
       right : 0;
       display: flex;
@@ -158,6 +209,8 @@ const InnerContainer = styled.div`
       width: 700px;
       height: 400px;
 
+      transform: translateX(30px);
+
       .wrapper {
         display : flex;
       }
@@ -166,6 +219,19 @@ const InnerContainer = styled.div`
         font-size: 2rem;
         margin-bottom: 20px;
       }
+      transition : 1s 0.5s;
+    }
+  }
+
+  section.appear {
+    .image{
+      opacity : 1;
+      transform: translateX(0);
+    }
+
+    .text {
+      opacity : 1;
+      transform: translateX(0);
     }
   }
 
@@ -179,6 +245,7 @@ const InnerContainer = styled.div`
       height: max-content;
 
       margin-top: 30px;
+      margin-bottom : 100px;
 
       .image {
         display: flex;
@@ -253,6 +320,35 @@ const BtnContainer = styled.div`
 `
 
 export const LandingPage = () => {
+  const image_1 = useRef()
+  const image_2 = useRef()
+  const image_3 = useRef()
+
+  // 교차감시 -> 해당 요소 보여지면 상태 true 로, 
+  // 혹은 클래스 추가 ref, addClass
+  // 각 요소에 애니메이션 추가
+  // forward
+  useEffect(() => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('appear')
+          io.unobserve(entry.target)
+        }
+      })
+    }, {
+      threshold: 1
+    })
+
+    io.observe(image_1.current)
+    io.observe(image_2.current)
+    io.observe(image_3.current)
+    // return () => {
+    //   io.disconnect()
+    // }
+  }, [])
+
+
   const navigate = useNavigate()
 
   return (
@@ -267,9 +363,13 @@ export const LandingPage = () => {
             <div className='start' onClick={() => navigate('/my_pics')}>시작하기 &gt;&gt;</div>
           </div>
         </div>
+        <div className='scroll_down'>
+          <p>scroll</p>
+          <BsChevronDoubleDown size="1.5rem" />
+        </div>
       </Top>
       <InnerContainer>
-        <section>
+        <section className='first' ref={image_1}>
           <div className="image">
             <img src={image1} alt="1" />
           </div>
@@ -278,7 +378,7 @@ export const LandingPage = () => {
             <p>남들과 공유하고 싶으셨던 적이 있으셨나요?</p>
           </div>
         </section>
-        <section>
+        <section className='second' ref={image_2}>
           <div className="image">
             <img src={image2} alt="2" />
           </div>
@@ -287,7 +387,7 @@ export const LandingPage = () => {
             <p>왠지 달라보이던 순간들이 있으셨나요?</p>
           </div>
         </section>
-        <section>
+        <section className='third' ref={image_3}>
           <div className="image">
             <img src={image3} alt="3" />
           </div>
