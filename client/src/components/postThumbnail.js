@@ -1,7 +1,9 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { BsGeoAltFill, BsChatDots, BsFillHeartFill } from "react-icons/bs";
+import { faSlidersH } from '@fortawesome/free-solid-svg-icons';
+import { LoadingIndicator } from './loadingIndicator';
 
 
 const Container = styled.section`
@@ -41,15 +43,36 @@ const Container = styled.section`
 `
 
 const PostImg = styled.div`
+  position: relative;
+
   width: 100%;
   height: 220px;
-  background: ${props => `url(${props.url})`};
-  background-size: cover;
-  background-position: center;
-  /* background-color: #fff; */
+
   border-radius: 10px;
   box-shadow: 0 3px 3px rgba(0,0,0,0.2);
+
+  overflow: hidden;
+
   z-index: 1;
+
+  .loading {
+    position: absolute;
+
+    display: grid;
+    place-items : center;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: #fff;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    
+    object-fit: cover;
+  }
 `
 
 const PostInfo = styled.div`
@@ -152,17 +175,14 @@ const Skeleton = styled.div`
 `
 
 export const PostThumbnail = ({ data, action, idx }) => { // 실 사용시에는 해당 위치에 props 로 게시글의 정보를 받아옴.
-
   const serverPath = process.env.REACT_APP_SERVER_PATH
   const userId = window.sessionStorage.getItem('userId')
 
   const [isLike, setIsLike] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const { _id, photo, title, location, likes, comment, nickname } = data
   // 여기서 _id 는 게시물 아이디임.
-
-  // 유저 닉네임과 댓글 갯수 가져와야함 
-
 
   useEffect(() => {
     if (data) {
@@ -180,7 +200,16 @@ export const PostThumbnail = ({ data, action, idx }) => { // 실 사용시에는
 
   return (
     <Container onClick={action} idx={idx}>
-      <PostImg url={photo} />
+      <PostImg>
+        {
+          isLoading && (
+            <div className='loading'>
+              <LoadingIndicator size="5rem" />
+            </div>
+          )
+        }
+        <img src={photo} alt="thumbnail img" onLoad={() => setIsLoading(false)} />
+      </PostImg>
       <PostInfo isLike={isLike}>
         <h3 className='title'>{title}</h3>
         <div className='nickname'>{nickname}</div>

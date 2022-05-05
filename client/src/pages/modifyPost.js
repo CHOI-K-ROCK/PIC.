@@ -48,17 +48,15 @@ const BoxContianer = styled.section`
 `
 
 const UploadImageBox = styled.section`
+  position: relative;
+
   display: grid;
   place-items: center;
 
   width: calc(50% - 5px);
   aspect-ratio: 1 / 1;
   
-  background-color: ${props => props.img ? '#000' : '#fff'};
-  background-image: ${props => props.img ? `url(${props.img})` : null};
-  background-position: center;
-  background-size: contain;
-  background-repeat: no-repeat;
+  background-color: #fff;
 
   box-shadow: 0px 3px 5px rgba(0,0,0,0.3);
 
@@ -68,8 +66,10 @@ const UploadImageBox = styled.section`
   
   color: #aaa;
 
+  overflow: hidden;
+
   &:hover{
-    background-color: ${props => props.img ? '#000' : '#FFEA7C'};
+    background-color: #FFEA7C;
     color : #555;
   }
 
@@ -82,6 +82,26 @@ const UploadImageBox = styled.section`
       font-size: 3rem;
     }
   }
+
+  .loading {
+    position: absolute;
+
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    height: 100%;
+
+    background-color: #fff;
+  }
+
+  img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    object-fit : contain;
+  }
+
   cursor: pointer;
 
   @media screen and (max-width : 500px) {
@@ -379,21 +399,15 @@ export const ModifyPost = () => {
   }
 
   const ImageContainer = () => {
-    if (isUploading) {
-      return (
-        <LoadingIndicator size="7rem" />
-      )
-    }
     if (!isUploading && !imgHostUrl) {
       return (<div className='click_for_upload'>
         <BsCameraFill />
         <p>클릭하여 이미지 업로드</p>
       </div>)
     }
-    if (imgHostUrl) {
-      return null
-    }
+    return null
   }
+
   const patchPost = async () => {
     const headers = {
       headers: {
@@ -434,6 +448,12 @@ export const ModifyPost = () => {
           <input type="file" accept="image/*" style={{ display: 'none' }} ref={imgInput} onChange={uploadImage} />
           <UploadImageBox onClick={() => imgInput.current.click()} img={imgHostUrl}>
             <ImageContainer />
+            {isUploading && (
+              <div className='loading'>
+                <LoadingIndicator size="7rem" />
+              </div>
+            )}
+            {imgHostUrl && <img src={imgHostUrl} alt="upload img" onLoad={() => setIsUploading(false)} />}
           </UploadImageBox>
           <KakaoMapBox ref={kakaoMap}>
             <MyLocationBtn onClick={getMyLocation}>
